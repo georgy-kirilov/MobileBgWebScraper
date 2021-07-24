@@ -5,6 +5,11 @@
 
     public class Advertisement
     {
+        public Advertisement()
+        {
+            ImagesUrls = new HashSet<string>();
+        }
+
         public string Title { get; set; }
 
         public string Brand { get; set; }
