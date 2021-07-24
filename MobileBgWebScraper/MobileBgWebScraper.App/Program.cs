@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
+    using System.Text;
     using System.Threading.Tasks;
     using AngleSharp;
     using MobileBgWebScraper.Models;
@@ -12,6 +13,8 @@
     {
         public static async Task Main()
         {
+            Console.OutputEncoding = Encoding.UTF8;
+
             var advertisements = new List<Advertisement>();
 
             var config = Configuration.Default.WithDefaultLoader();
@@ -83,6 +86,11 @@
                     {
                         advertisement.ImagesUrls.Add(imageUrl);
                     }
+
+                    advertisement.Description = advertisementDocument
+                                                        .QuerySelectorAll("form[name='search'] > table")[2]
+                                                        .QuerySelector("tbody > tr > td")
+                                                        .TextContent;
 
                     advertisements.Add(advertisement);
                 }
