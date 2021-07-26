@@ -10,10 +10,26 @@
 
     using AngleSharp;
 
-    using static AdvertisementPropertyParsers;
+    using static AdvertisementCharacteristicParsers;
+    using AngleSharp.Dom;
 
     public class Program
     {
+        public delegate void CharacteristicParser(string input, AdvertisementInputModel advertisement);
+
+        public static readonly Dictionary<string, CharacteristicParser> CharacteristicsParsingTable = new()
+        {
+            { "дата на производство", ParseManufacturingDate },
+            { "тип двигател", ParseEngineType },
+            { "мощност", ParseHorsePowers },
+            { "скоростна кутия", ParseTransmissionType },
+            { "категория", ParseBodyStyle },
+            { "пробег", ParseKilometrage },
+            { "цвят", ParseColorName },
+            { "евростандарт", ParseEuroStandard },
+        };
+
+
         public static async Task Main()
         {
             Startup.ConfigureDatabase();
@@ -26,18 +42,7 @@
             var address = "https://www.mobile.bg/pcgi/mobile.cgi?act=3&slink=kvo3k4&f1=";
             var query = "a.mmm";
 
-            var propertiesParsingTable = new Dictionary<string, Action<string, AdvertisementInputModel>>()
-            {
-                { "дата на производство", ParseManufacturingDate },
-                { "тип двигател", ParseEngineType },
-                { "мощност", ParseHorsePowers },
-                { "скоростна кутия", ParseTransmissionType },
-                { "категория", ParseBodyStyle },
-                { "пробег", ParseKilometrage },
-                { "цвят", ParseColorName },
-                { "евростандарт", ParseEuroStandard },
-            };
-
+            
             for (int page = 1; page <= 10; page++)
             {
                 var document = await context.OpenAsync($"{address}{page}");
@@ -45,67 +50,115 @@
 
                 foreach (string url in urls)
                 {
-                    var input = new AdvertisementInputModel();
                     var advertisementDocument = await context.OpenAsync($"https:{url}");
-
-                    input.Title = advertisementDocument.QuerySelector("h1").TextContent;
-
-                    string href = advertisementDocument.QuerySelector("a.fastLinks").GetAttribute("href").Trim();
-                    var hrefArgs = href.Split("?")[1].Split("&");
-
-                    input.BrandName = hrefArgs[1].Split("=")[1];
-                    input.ModelName = hrefArgs[2].Split("=")[1];
-
-                    var carProperties = advertisementDocument.QuerySelectorAll("ul.dilarData > li");
-
-                    for (int i = 0; i < carProperties.Length; i += 2)
-                    {
-                        string currentPropertyName = carProperties[i].TextContent.ToLower();
-                        string currentPropertyValue = carProperties[i + 1].TextContent;
-
-                        propertiesParsingTable[currentPropertyName].Invoke(currentPropertyValue, input);
-                    }
-
-                    try
-                    {
-                        string priceAsString = advertisementDocument
-                                                .QuerySelector("#details_price")
-                                                .TextContent
-                                                .Replace("лв.", string.Empty)
-                                                .Replace(" ", string.Empty);
-
-                        input.Price = decimal.Parse(priceAsString);
-                    }
-                    catch (Exception)
-                    {
-                        input.Price = null;
-                    }
-
-                    input.Views = int.Parse(advertisementDocument.QuerySelector("span.advact").TextContent);
-
-                    var imagesUrls = advertisementDocument
-                                                .QuerySelectorAll("div#pictures_moving > a")
-                                                .Select(a => a.GetAttribute("data-link"));
-
-                    foreach (string imageUrl in imagesUrls)
-                    {
-                        input.ImageUrls.Add(imageUrl);
-                    }
-
-                    input.Description = advertisementDocument
-                                                        .QuerySelectorAll("form[name='search'] > table")[2]
-                                                        .QuerySelector("tbody > tr > td")
-                                                        .TextContent;
-
-                    var addressBlocks = advertisementDocument.QuerySelectorAll("div.adress");
-                    int addressBlockIndex = addressBlocks.Length > 1 ? 1 : 0;
-                    string fullAddress = addressBlocks[addressBlockIndex].TextContent.Trim();
-
-                    var fullAddressArgs = fullAddress.Split(", ");
-
-                    input.RegionName = fullAddressArgs[0];
-                    input.TownName = fullAddressArgs[1];
+                    AdvertisementInputModel inputModel = ParseAdvertisement(advertisementDocument);
                 }
+            }
+        }
+
+        public static AdvertisementInputModel ParseAdvertisement(IDocument document)
+        {
+            var inputModel = new AdvertisementInputModel();
+
+            ParseTitle(document, inputModel);
+            ParseBrandAndModelName(document, inputModel);
+
+            ParseTechnicalCharacteristics(document, inputModel);
+            ParsePrice(document, inputModel);
+
+            ParseViews(document, inputModel);
+            ParseImageUrls(document, inputModel);
+
+            ParseDescription(document, inputModel);
+            ParseRegionAndTownName(document, inputModel);
+
+            return inputModel;
+        }
+
+        public static void ParseBrandAndModelName(IDocument document, AdvertisementInputModel advertisement)
+        {
+            var args = document
+                        .QuerySelector("a.fastLinks")
+                        .GetAttribute("href")
+                        .Trim()
+                        .Split("?")[1]
+                        .Split("&");
+
+            advertisement.BrandName = args[1].Split("=")[1];
+            advertisement.ModelName = args[2].Split("=")[1];
+        }
+
+        public static void ParsePrice(IDocument document, AdvertisementInputModel advertisement)
+        {
+            try
+            {
+                string input = document
+                                .QuerySelector("#details_price")?
+                                .TextContent
+                                .Replace("лв.", string.Empty)
+                                .Replace(" ", string.Empty);
+
+                advertisement.Price = decimal.Parse(input);
+            }
+            catch (Exception)
+            {
+                advertisement.Price = null;
+            }
+        }
+
+        public static void ParseDescription(IDocument document, AdvertisementInputModel advertisement)
+        {
+            string description = document
+                                  .QuerySelectorAll("form[name='search'] > table")[2]
+                                  .QuerySelector("tbody > tr > td")?
+                                  .TextContent;
+
+            advertisement.Description = description;
+        }
+
+        public static void ParseRegionAndTownName(IDocument document, AdvertisementInputModel advertisement)
+        {
+            var addressBlocks = document.QuerySelectorAll("div.adress");
+            int addressBlockIndex = addressBlocks.Length > 1 ? 1 : 0;
+            string fullAddress = addressBlocks[addressBlockIndex].TextContent.Trim();
+
+            var fullAddressArgs = fullAddress.Split(", ");
+            advertisement.RegionName = fullAddressArgs[0];
+            advertisement.TownName = fullAddressArgs[1];
+        }
+
+        public static void ParseTitle(IDocument document, AdvertisementInputModel advertisement)
+        {
+            advertisement.Title = document.QuerySelector("h1")?.TextContent;
+        }
+
+        public static void ParseViews(IDocument document, AdvertisementInputModel advertisement)
+        {
+            advertisement.Views = int.Parse(document.QuerySelector("span.advact")?.TextContent);
+        }
+
+        public static void ParseImageUrls(IDocument document, AdvertisementInputModel advertisement)
+        {
+            var imagesUrls = document
+                              .QuerySelectorAll("div#pictures_moving > a")
+                              .Select(a => a.GetAttribute("data-link"));
+
+            foreach (string imageUrl in imagesUrls)
+            {
+                advertisement.ImageUrls.Add(imageUrl);
+            }
+        }
+
+        public static void ParseTechnicalCharacteristics(IDocument document, AdvertisementInputModel advertisement)
+        {
+            var carProperties = document.QuerySelectorAll("ul.dilarData > li");
+
+            for (int i = 0; i < carProperties.Length; i += 2)
+            {
+                string currentPropertyName = carProperties[i].TextContent.ToLower();
+                string currentPropertyValue = carProperties[i + 1].TextContent;
+
+                CharacteristicsParsingTable[currentPropertyName].Invoke(currentPropertyValue, advertisement);
             }
         }
     }
