@@ -1,5 +1,8 @@
 ﻿namespace MobileBgWebScraper.App
 {
+    using MobileBgWebScraper.Data;
+    using MobileBgWebScraper.Models;
+
     using System;
     using System.Linq;
     using System.Threading.Tasks;
@@ -13,6 +16,11 @@
     {
         public static async Task Main()
         {
+            Startup.ConfigureDatabase();
+
+            var dbContext = new MobileBgDbContext();
+            await dbContext.Database.EnsureCreatedAsync();
+
             var config = Configuration.Default.WithDefaultLoader();
             var context = BrowsingContext.New(config);
             var address = "https://www.mobile.bg/pcgi/mobile.cgi?act=3&slink=kvo3k4&f1=";

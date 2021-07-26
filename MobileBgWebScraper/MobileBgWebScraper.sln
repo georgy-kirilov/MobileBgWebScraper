@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31515.178
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MobileBgWebScraper.Models", "MobileBgWebScraper.Models\MobileBgWebScraper.Models.csproj", "{1F8123AB-3D2C-4742-B00F-817AC3E49994}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MobileBgWebScraper.Models", "MobileBgWebScraper.Models\MobileBgWebScraper.Models.csproj", "{1F8123AB-3D2C-4742-B00F-817AC3E49994}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MobileBgWebScraper.App", "MobileBgWebScraper.App\MobileBgWebScraper.App.csproj", "{23851B85-60AD-44B9-8ACF-99511305220A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MobileBgWebScraper.App", "MobileBgWebScraper.App\MobileBgWebScraper.App.csproj", "{23851B85-60AD-44B9-8ACF-99511305220A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MobileBgWebScraper.Data", "MobileBgWebScraper.Data\MobileBgWebScraper.Data.csproj", "{FF87CD23-BB4D-4646-931A-1DDB01EF6143}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{23851B85-60AD-44B9-8ACF-99511305220A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{23851B85-60AD-44B9-8ACF-99511305220A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{23851B85-60AD-44B9-8ACF-99511305220A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FF87CD23-BB4D-4646-931A-1DDB01EF6143}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FF87CD23-BB4D-4646-931A-1DDB01EF6143}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FF87CD23-BB4D-4646-931A-1DDB01EF6143}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FF87CD23-BB4D-4646-931A-1DDB01EF6143}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
