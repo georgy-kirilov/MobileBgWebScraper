@@ -3,7 +3,7 @@
     using System;
     using System.Globalization;
 
-    public static class AdvertisementCharacteristicParsers
+    public static class TechnicalCharacteristicsParsers
     {
         public static void ParseManufacturingDate(string input, AdvertisementInputModel advertisement)
         {
