@@ -15,22 +15,22 @@
         {
             Console.OutputEncoding = Encoding.UTF8;
 
-            var advertisements = new List<Advertisement>();
+            var advertisements = new List<AdvertisementInputModel>();
 
             var config = Configuration.Default.WithDefaultLoader();
             var context = BrowsingContext.New(config);
             var address = "https://www.mobile.bg/pcgi/mobile.cgi?act=3&slink=kvo3k4&f1=";
             var query = "a.mmm";
 
-            var propertiesParsingTable = new Dictionary<string, Action<string, Advertisement>>()
+            var propertiesParsingTable = new Dictionary<string, Action<string, AdvertisementInputModel>>()
             {
                 { "дата на производство", ParseManufacturingDate },
-                { "тип двигател", (input, advert) => advert.Engine = input?.Trim() },
+                { "тип двигател", (input, advert) => advert.EngineType = input?.Trim() },
                 { "мощност", ParseHorsePowers },
-                { "скоростна кутия", (input, advert) => advert.Transmission = input?.Trim() },
+                { "скоростна кутия", (input, advert) => advert.TransmissionType = input?.Trim() },
                 { "категория", (input, advert) => advert.BodyStyle = input?.Trim() },
                 { "пробег", ParseKilometrage },
-                { "цвят", (input, advert) => advert.Color = input?.Trim() },
+                { "цвят", (input, advert) => advert.ColorName = input?.Trim() },
                 { "евростандарт", (input, advert) => advert.EuroStandard = input?.Trim() },
             };
 
@@ -41,15 +41,15 @@
 
                 foreach (var url in urls)
                 {
-                    var advertisement = new Advertisement();
+                    var input = new AdvertisementInputModel();
                     var advertisementDocument = await context.OpenAsync($"https:{url}");
 
-                    advertisement.Title = advertisementDocument.QuerySelector("h1").TextContent;
+                    input.Title = advertisementDocument.QuerySelector("h1").TextContent;
 
                     var href = advertisementDocument.QuerySelector("a.fastLinks").GetAttribute("href").Trim();
                     var hrefArgs = href.Split("?")[1].Split("&");
-                    advertisement.Brand = hrefArgs[1].Split("=")[1];
-                    advertisement.Model = hrefArgs[2].Split("=")[1];
+                    input.BrandName = hrefArgs[1].Split("=")[1];
+                    input.ModelName = hrefArgs[2].Split("=")[1];
 
                     var carProperties = advertisementDocument.QuerySelectorAll("ul.dilarData > li");
 
@@ -58,7 +58,7 @@
                         string currentPropertyName = carProperties[i].TextContent.ToLower();
                         string currentPropertyValue = carProperties[i + 1].TextContent;
 
-                        propertiesParsingTable[currentPropertyName].Invoke(currentPropertyValue, advertisement);
+                        propertiesParsingTable[currentPropertyName].Invoke(currentPropertyValue, input);
                     }
 
                     try
@@ -69,14 +69,14 @@
                                                 .Replace("лв.", string.Empty)
                                                 .Replace(" ", string.Empty);
 
-                        advertisement.Price = decimal.Parse(priceAsString);
+                        input.Price = decimal.Parse(priceAsString);
                     }
                     catch (Exception)
                     {
-                        continue;
+                        input.Price = null;
                     }
 
-                    advertisement.Views = int.Parse(advertisementDocument.QuerySelector("span.advact").TextContent);
+                    input.Views = int.Parse(advertisementDocument.QuerySelector("span.advact").TextContent);
 
                     var imagesUrls = advertisementDocument
                                                 .QuerySelectorAll("div#pictures_moving > a")
@@ -84,22 +84,28 @@
 
                     foreach (string imageUrl in imagesUrls)
                     {
-                        advertisement.ImagesUrls.Add(imageUrl);
+                        input.ImageUrls.Add(imageUrl);
                     }
 
-                    advertisement.Description = advertisementDocument
+                    input.Description = advertisementDocument
                                                         .QuerySelectorAll("form[name='search'] > table")[2]
                                                         .QuerySelector("tbody > tr > td")
                                                         .TextContent;
 
-                    advertisements.Add(advertisement);
+                    string fullAddress = advertisementDocument.QuerySelectorAll("div.adress")[1].TextContent;
+                    var fullAddressArgs = fullAddress.Split(", ");
+
+                    input.RegionName = fullAddressArgs[0];
+                    input.TownName = fullAddressArgs[1];
+
+                    advertisements.Add(input);
                 }
             }
 
             Console.WriteLine(advertisements.Count);
         }
 
-        public static void ParseManufacturingDate(string input, Advertisement advertisement)
+        public static void ParseManufacturingDate(string input, AdvertisementInputModel advertisement)
         {
             if (input == null)
             {
@@ -115,7 +121,7 @@
             advertisement.ManufacturingDate = new DateTime(year, month, 1);
         }
 
-        public static void ParseHorsePowers(string input, Advertisement advertisement)
+        public static void ParseHorsePowers(string input, AdvertisementInputModel advertisement)
         {
             if (input == null)
             {
@@ -130,7 +136,7 @@
             advertisement.HorsePowers = horsePowers;
         }
 
-        public static void ParseKilometrage(string input, Advertisement advertisement)
+        public static void ParseKilometrage(string input, AdvertisementInputModel advertisement)
         {
             if (input == null)
             {
