@@ -44,7 +44,7 @@
 
         public Engine Engine { get; set; }
 
-        public int EuroStandardId { get; set; }
+        public int? EuroStandardId { get; set; }
 
         public EuroStandard EuroStandard { get; set; }
 
