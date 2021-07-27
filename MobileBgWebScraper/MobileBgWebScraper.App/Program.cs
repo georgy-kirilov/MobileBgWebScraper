@@ -22,13 +22,12 @@
             await dbContext.Database.EnsureDeletedAsync();
             await dbContext.Database.EnsureCreatedAsync();
 
-
             var config = Configuration.Default.WithDefaultLoader();
             var context = BrowsingContext.New(config);
             var address = "https://www.mobile.bg/pcgi/mobile.cgi?act=3&slink=kvo3k4&f1=";
             var query = "a.mmm";
 
-            for (int page = 2; page <= 2; page++)
+            for (int page = 10; page <= 20; page++)
             {
                 var document = await context.OpenAsync($"{address}{page}");
                 var urls = document.QuerySelectorAll(query).Select(a => a.GetAttribute("href").Trim());
@@ -39,7 +38,7 @@
                     var inputModel = AdvertisementParser.Parse(advertisementDocument);
 
                     Brand brand = CreateBrand(dbContext, inputModel);
-                    Model model = CreateModel(dbContext, inputModel, brand);
+                    Model model = CreateModel(inputModel, brand);
                     Color color = CreateColor(dbContext, inputModel);
                     Engine engine = CreateEngine(dbContext, inputModel);
                     Transmission transmission = CreateTransmission(dbContext, inputModel);
@@ -69,9 +68,10 @@
                     };
 
                     AddImagesToAdvertisement(inputModel, advertisement);
-
+                    Console.WriteLine(color?.Name);
                     await dbContext.Advertisements.AddAsync(advertisement);
                     await dbContext.SaveChangesAsync();
+
                 }
             }
         }
@@ -82,7 +82,7 @@
                 ?? new Brand { Name = inputModel.BrandName };
         }
 
-        public static Model CreateModel(MobileBgDbContext dbContext, AdvertisementInputModel inputModel, Brand brand)
+        public static Model CreateModel(AdvertisementInputModel inputModel, Brand brand)
         {
             return brand.Models.FirstOrDefault(m => m.Name == inputModel.ModelName)
                 ?? new Model { Name = inputModel.ModelName, Brand = brand };
@@ -90,6 +90,11 @@
 
         public static Color CreateColor(MobileBgDbContext dbContext, AdvertisementInputModel inputModel)
         {
+            if (inputModel.ColorName == null)
+            {
+                return null;
+            }
+
             return dbContext.Colors.FirstOrDefault(c => c.Name == inputModel.ColorName)
                 ?? new Color { Name = inputModel.ColorName };
         }
