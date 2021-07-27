@@ -10,6 +10,8 @@
             ImageUrls = new HashSet<string>();
         }
 
+        public string RemoteId { get; set; }
+
         public string Title { get; set; }
 
         public string Description { get; set; }

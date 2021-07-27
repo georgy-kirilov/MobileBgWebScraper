@@ -21,6 +21,10 @@
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Advertisement>()
+                        .HasIndex(a => a.RemoteId)
+                        .IsUnique();
+
             modelBuilder.Entity<Brand>()
                         .HasMany(brand => brand.Models)
                         .WithOne(model => model.Brand)
