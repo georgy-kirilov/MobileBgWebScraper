@@ -1,18 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AngleSharp" Version="0.16.0" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\MobileBgWebScraper.Data\MobileBgWebScraper.Data.csproj" />
     <ProjectReference Include="..\MobileBgWebScraper.Models\MobileBgWebScraper.Models.csproj" />
-    <ProjectReference Include="..\MobileBgWebScraper.Services\MobileBgWebScraper.Services.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,4 +1,4 @@
-﻿namespace MobileBgWebScraper.App
+﻿namespace MobileBgWebScraper.Services
 {
     using System;
     using System.Collections.Generic;

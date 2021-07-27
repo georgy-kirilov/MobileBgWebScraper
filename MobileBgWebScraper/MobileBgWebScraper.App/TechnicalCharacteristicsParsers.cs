@@ -3,6 +3,8 @@
     using System;
     using System.Globalization;
 
+    using MobileBgWebScraper.Services;
+
     public static class TechnicalCharacteristicsParsers
     {
         public static void ParseManufacturingDate(string input, AdvertisementInputModel advertisement)

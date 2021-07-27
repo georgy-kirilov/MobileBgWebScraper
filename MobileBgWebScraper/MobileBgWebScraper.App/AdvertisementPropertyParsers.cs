@@ -8,6 +8,8 @@
 
     using static TechnicalCharacteristicsParsers;
 
+    using MobileBgWebScraper.Services;
+
     public class AdvertisementPropertyParsers
     {
         public delegate void TechnicalCharacteristicsParser(string input, AdvertisementInputModel advertisement);

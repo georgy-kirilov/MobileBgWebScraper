@@ -1,8 +1,9 @@
 ﻿namespace MobileBgWebScraper.App
 {
-    using AngleSharp.Dom;
-
     using static AdvertisementPropertyParsers;
+
+    using AngleSharp.Dom;
+    using MobileBgWebScraper.Services;
 
     public class AdvertisementParser
     {
