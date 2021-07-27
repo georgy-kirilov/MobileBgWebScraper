@@ -32,7 +32,7 @@
             var modelFactory = new ModelFactory(dbContext);
             var advertisementsService = new AdvertisementsService(dbContext, modelFactory);
 
-            for (int page = 10; page <= 20; page++)
+            for (int page = 1; page <= 10; page++)
             {
                 var document = await context.OpenAsync($"{address}{page}");
                 var urls = document.QuerySelectorAll(query).Select(a => a.GetAttribute("href").Trim());
@@ -40,7 +40,7 @@
                 foreach (string url in urls)
                 {
                     var advertisementDocument = await context.OpenAsync($"https:{url}");
-                    var inputModel = AdvertisementParser.Parse(advertisementDocument);
+                    var inputModel = AdvertisementParser.Parse(url, advertisementDocument);
                     await advertisementsService.AddAdvertisementAsync(inputModel);
                 }
             }

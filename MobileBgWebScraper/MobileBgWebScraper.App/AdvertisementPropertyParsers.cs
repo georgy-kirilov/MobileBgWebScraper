@@ -112,5 +112,11 @@
                 CharacteristicsParsingTable[currentPropertyName].Invoke(currentPropertyValue, advertisement);
             }
         }
+
+        public static void ParseRemoteId(string advertisementUrl, AdvertisementInputModel advertisement)
+        {
+            string remoteId = advertisementUrl.Split("?")[1].Split("&")[1].Split("=")[1];
+            advertisement.RemoteId = remoteId;
+        }
     }
 }

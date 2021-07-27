@@ -7,9 +7,11 @@
 
     public class AdvertisementParser
     {
-        public static AdvertisementInputModel Parse(IDocument document)
+        public static AdvertisementInputModel Parse(string advertisementUrl, IDocument document)
         {
             var inputModel = new AdvertisementInputModel();
+
+            ParseRemoteId(advertisementUrl, inputModel);
 
             ParseTitle(document, inputModel);
             ParseBrandAndModelName(document, inputModel);
